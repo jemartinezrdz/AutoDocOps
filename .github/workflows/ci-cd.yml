@@ -1,4 +1,4 @@
-name: AutoDocOps CI/CD Simple
+name: AutoDocOps CI/CD
 
 on:
   push:
@@ -10,7 +10,7 @@ env:
   DOTNET_VERSION: '8.0.x'
 
 jobs:
-  # Job 1: Build y Test Backend (Simplificado)
+  # Job 1: Build y Test Backend
   backend-build-test:
     name: Backend Build & Test
     runs-on: ubuntu-latest
@@ -34,10 +34,11 @@ jobs:
         cd backend/src/AutoDocOps.Api/AutoDocOps.Api
         dotnet build --no-restore --configuration Release
       
-    - name: Test basic compilation
+    - name: Test compilation
       run: |
         cd backend/src/AutoDocOps.Api/AutoDocOps.Api
-        echo "✅ Backend compiled successfully"
+        dotnet publish --no-build --configuration Release --output ./publish
+        echo "✅ Backend compiled and published successfully"
 
   # Job 2: Security Scanning (Básico)
   security-scan:
