@@ -10,7 +10,8 @@ type AuthAction =
   | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string } }
   | { type: 'LOGOUT' }
   | { type: 'UPDATE_USER'; payload: User }
-  | { type: 'RESTORE_SESSION'; payload: { user: User; token: string } };
+  | { type: 'RESTORE_SESSION'; payload: { user: User; token: string } }
+  | { type: 'UPDATE_TOKEN'; payload: string };
 
 // Initial state
 const initialState: AuthState = {
@@ -56,6 +57,11 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         token: action.payload.token,
         isAuthenticated: true,
         isLoading: false,
+      };
+    case 'UPDATE_TOKEN':
+      return {
+        ...state,
+        token: action.payload,
       };
     default:
       return state;
@@ -126,7 +132,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
 
-      const response = await apiService.post('/auth/login', credentials);
+      const response = await apiService.post<{ user: User; token: string }>(
+        '/auth/login',
+        credentials
+      );
       
       if (response.success && response.data) {
         const { user, token } = response.data;
@@ -152,7 +161,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
 
-      const response = await apiService.post('/auth/register', userData);
+      const response = await apiService.post<{ user: User; token: string }>(
+        '/auth/register',
+        userData
+      );
       
       if (response.success && response.data) {
         const { user, token } = response.data;
@@ -194,12 +206,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshToken = async (): Promise<void> => {
     try {
-      const response = await apiService.post('/auth/refresh');
-      
+      const response = await apiService.post<{ token: string }>('/auth/refresh');
+
       if (response.success && response.data) {
         const { token } = response.data;
         await apiService.setAuthToken(token);
         await SecureStore.setItemAsync(STORAGE_KEYS.AUTH_TOKEN, token);
+        dispatch({ type: 'UPDATE_TOKEN', payload: token });
       }
     } catch (error) {
       console.error('Error refreshing token:', error);

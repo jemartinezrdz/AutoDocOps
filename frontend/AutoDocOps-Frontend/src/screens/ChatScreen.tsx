@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, TYPOGRAPHY } from '../../constants';
+import { COLORS, TYPOGRAPHY } from '../constants';
 
 const ChatScreen: React.FC = () => {
   return (

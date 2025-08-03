@@ -7,10 +7,12 @@ import {
   StyleSheet,
   RefreshControl,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Project, ProjectStatus, ProjectType } from '../../types';
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS, PROJECT_STATUS } from '../../constants';
+import projectService from '../../services/projectService';
 
 interface ProjectsListScreenProps {
   navigation: any;
@@ -25,102 +27,25 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ navigation }) =
     loadProjects();
   }, []);
 
-  const loadProjects = async (): Promise<void> => {
+  const loadProjects = async (showLoading = true): Promise<void> => {
     try {
-      setIsLoading(true);
-      // TODO: Implement API call to load projects
-      // const response = await projectService.getProjects();
-      // setProjects(response.data);
-      
-      // Mock data for now
-      const mockProjects: Project[] = [
-        {
-          id: '1',
-          name: 'API E-Commerce',
-          description: 'API para sistema de comercio electrónico',
-          type: ProjectType.DotNetApi,
-          status: ProjectStatus.DocumentationGenerated,
-          connectionConfig: {
-            connectionString: 'https://api.ecommerce.com',
-            authenticationType: 'Bearer',
-            isEnabled: true,
-            timeoutSeconds: 30,
-          },
-          repositoryUrl: 'https://github.com/company/ecommerce-api',
-          branch: 'main',
-          preferredLanguage: 1,
-          documentationConfig: {
-            generateOpenApi: true,
-            generateSwaggerUI: true,
-            generatePostmanCollection: true,
-            generateTypeScriptSDK: true,
-            generateCSharpSDK: false,
-            generateERDiagrams: false,
-            generateDataDictionary: false,
-            generateUsageGuides: true,
-            enableSemanticChat: true,
-            diagramFormat: 'PNG',
-            theme: 'Default',
-            includeCodeExamples: true,
-            includeVersioning: true,
-          },
-          lastAnalyzedAt: '2024-08-01T10:30:00Z',
-          version: '1.2.0',
-          createdAt: '2024-07-15T09:00:00Z',
-          updatedAt: '2024-08-01T10:30:00Z',
-          createdBy: 'user1',
-          updatedBy: 'user1',
-          isActive: true,
-        },
-        {
-          id: '2',
-          name: 'Base de Datos Inventario',
-          description: 'Esquema de base de datos para gestión de inventario',
-          type: ProjectType.SqlServerDatabase,
-          status: ProjectStatus.Analyzing,
-          connectionConfig: {
-            connectionString: 'Server=localhost;Database=Inventory;',
-            authenticationType: 'SqlServer',
-            username: 'sa',
-            isEnabled: true,
-            timeoutSeconds: 30,
-          },
-          preferredLanguage: 1,
-          documentationConfig: {
-            generateOpenApi: false,
-            generateSwaggerUI: false,
-            generatePostmanCollection: false,
-            generateTypeScriptSDK: false,
-            generateCSharpSDK: false,
-            generateERDiagrams: true,
-            generateDataDictionary: true,
-            generateUsageGuides: true,
-            enableSemanticChat: true,
-            diagramFormat: 'SVG',
-            theme: 'Default',
-            includeCodeExamples: true,
-            includeVersioning: false,
-          },
-          version: '1.0.0',
-          createdAt: '2024-07-20T14:00:00Z',
-          updatedAt: '2024-08-02T08:15:00Z',
-          createdBy: 'user1',
-          updatedBy: 'user1',
-          isActive: true,
-        },
-      ];
-      
-      setProjects(mockProjects);
+      if (showLoading) {
+        setIsLoading(true);
+      }
+      const data = await projectService.getProjects();
+      setProjects(data);
     } catch (error) {
       Alert.alert('Error', 'No se pudieron cargar los proyectos');
     } finally {
-      setIsLoading(false);
+      if (showLoading) {
+        setIsLoading(false);
+      }
     }
   };
 
   const onRefresh = async (): Promise<void> => {
     setRefreshing(true);
-    await loadProjects();
+    await loadProjects(false);
     setRefreshing(false);
   };
 
@@ -195,6 +120,14 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ navigation }) =
     </View>
   );
 
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -215,7 +148,7 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ navigation }) =
         ListEmptyComponent={renderEmptyState}
         showsVerticalScrollIndicator={false}
       />
-      
+
       {projects.length > 0 && (
         <TouchableOpacity
           style={styles.fab}
@@ -231,6 +164,12 @@ const ProjectsListScreen: React.FC<ProjectsListScreenProps> = ({ navigation }) =
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: COLORS.background,
   },
   listContainer: {
