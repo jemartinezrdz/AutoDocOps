@@ -265,3 +265,9 @@ public partial class AppJsonSerializerContext : JsonSerializerContext
 {
 }
 
+
+/// <summary>
+/// Clase Program pública para tests de integración
+/// </summary>
+public partial class Program { }
+
