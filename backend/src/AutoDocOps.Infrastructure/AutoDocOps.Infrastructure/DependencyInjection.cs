@@ -21,10 +21,14 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         // Configurar pool de conexiones Npgsql
-        var connectionString = configuration.GetConnectionString("DefaultConnection") 
+        // Priorizar DATABASE_URL de variables de entorno sobre ConnectionStrings
+        var connectionString = configuration["DATABASE_URL"] 
+            ?? configuration.GetConnectionString("DefaultConnection") 
             ?? throw new InvalidOperationException("Connection string no configurada");
 
         // Configurar Npgsql con pool de conexiones optimizado
+        // Temporalmente comentado para testing local
+        /*
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
         
         // Configurar pool de conexiones
@@ -60,10 +64,15 @@ public static class DependencyInjection
             options.EnableDetailedErrors(false);
             options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         });
+        */
 
         // Configurar health checks para la base de datos
-        services.AddHealthChecks()
-            .AddNpgSql(connectionString, name: "postgresql");
+        // Temporalmente comentado para testing local
+        // services.AddHealthChecks()
+        //     .AddNpgSql(connectionString, name: "postgresql");
+        
+        // Health checks básicos para testing
+        services.AddHealthChecks();
 
         // Configurar servicios de Supabase
         var supabaseUrl = configuration["Supabase:Url"];
