@@ -1,0 +1,90 @@
+# Configuración de Fly.io para AutoDocOps API
+app = "autodocops-api"
+primary_region = "mia"  # Miami para mejor latencia en LATAM
+
+[build]
+  dockerfile = "./backend/Dockerfile"
+
+[env]
+  ASPNETCORE_ENVIRONMENT = "Production"
+  ASPNETCORE_URLS = "http://0.0.0.0:8080"
+  ASPNETCORE_HTTP_PORTS = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 1000
+    soft_limit = 800
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/health"
+
+[machine]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
+
+# Configuración de base de datos (Supabase)
+[env]
+  DATABASE_URL = { from_secret = "DATABASE_URL" }
+  SUPABASE_URL = { from_secret = "SUPABASE_URL" }
+  SUPABASE_KEY = { from_secret = "SUPABASE_KEY" }
+  OPENAI_API_KEY = { from_secret = "OPENAI_API_KEY" }
+  JWT_KEY = { from_secret = "JWT_KEY" }
+  JWT_ISSUER = "AutoDocOps"
+  JWT_AUDIENCE = "AutoDocOps-Users"
+
+# Configuración de métricas y logging
+[metrics]
+  port = 9091
+  path = "/metrics"
+
+# Configuración de volúmenes para logs persistentes
+[[mounts]]
+  source = "autodocops_logs"
+  destination = "/app/logs"
+
+# Configuración de red
+[network]
+  ipv4_dedicated = false
+  ipv6 = false
+
+# Configuración de escalado automático
+[scaling]
+  min_machines_running = 1
+  max_machines_running = 10
+
+  [[scaling.regions]]
+    region = "mia"
+    min_machines_running = 1
+
+  [[scaling.regions]]
+    region = "scl"  # Santiago para usuarios de Chile
+    min_machines_running = 0
+
+# Configuración de deploy
+[deploy]
+  release_command = "echo 'Deployment completed successfully'"
+  strategy = "rolling"
+
+# Configuración de restart policy
+[restart]
+  policy = "on-failure"
+  max_retries = 3
+

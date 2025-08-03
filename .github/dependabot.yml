@@ -1,0 +1,96 @@
+# Configuración de Dependabot para AutoDocOps
+version: 2
+updates:
+  # Dependencias de .NET
+  - package-ecosystem: "nuget"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "autodocops-team"
+    assignees:
+      - "autodocops-team"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "backend"
+      - "dotnet"
+    ignore:
+      # Ignorar actualizaciones de versiones major para estabilidad
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # Dependencias de Node.js/React
+  - package-ecosystem: "npm"
+    directory: "/frontend/AutoDocOps-Frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "autodocops-team"
+    assignees:
+      - "autodocops-team"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "nodejs"
+    ignore:
+      # Ignorar actualizaciones de versiones major para estabilidad
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      # Ignorar actualizaciones específicas que pueden causar breaking changes
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "autodocops-team"
+    assignees:
+      - "autodocops-team"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci-cd"
+
+  # Docker
+  - package-ecosystem: "docker"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "autodocops-team"
+    assignees:
+      - "autodocops-team"
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "infrastructure"
+

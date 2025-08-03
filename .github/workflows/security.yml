@@ -1,0 +1,237 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Ejecutar análisis de seguridad semanalmente los lunes a las 2 AM UTC
+    - cron: '0 2 * * 1'
+
+jobs:
+  # CodeQL Analysis
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp', 'javascript' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-extended,security-and-quality
+
+    - name: Setup .NET (for C# analysis)
+      if: matrix.language == 'csharp'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Build .NET project (for C# analysis)
+      if: matrix.language == 'csharp'
+      run: |
+        dotnet restore ./backend
+        dotnet build ./backend --no-restore
+
+    - name: Setup Node.js (for JavaScript analysis)
+      if: matrix.language == 'javascript'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: ./frontend/AutoDocOps-Frontend/package-lock.json
+
+    - name: Install dependencies (for JavaScript analysis)
+      if: matrix.language == 'javascript'
+      run: npm ci
+      working-directory: ./frontend/AutoDocOps-Frontend
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+
+  # OWASP Dependency Check
+  dependency-check:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore .NET dependencies
+      run: dotnet restore ./backend
+
+    - name: Run OWASP Dependency Check
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'AutoDocOps'
+        path: '.'
+        format: 'ALL'
+        args: >
+          --enableRetired
+          --enableExperimental
+          --failOnCVSS 7
+          --exclude "**/node_modules/**"
+          --exclude "**/bin/**"
+          --exclude "**/obj/**"
+
+    - name: Upload OWASP Dependency Check results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: reports/dependency-check-report.sarif
+
+    - name: Upload dependency check report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: dependency-check-report
+        path: reports/
+
+  # Trivy Security Scanner
+  trivy-scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner in repo mode
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH,MEDIUM'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Run Trivy scanner for Docker image
+      if: github.ref == 'refs/heads/main'
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'ghcr.io/${{ github.repository }}:latest'
+        format: 'sarif'
+        output: 'trivy-image-results.sarif'
+
+    - name: Upload Docker image scan results
+      if: github.ref == 'refs/heads/main'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-image-results.sarif'
+
+  # Secrets Detection
+  secrets-detection:
+    name: Secrets Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Run TruffleHog OSS
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+  # License Compliance Check
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Install license checker
+      run: dotnet tool install --global dotnet-project-licenses
+
+    - name: Check .NET licenses
+      run: dotnet-project-licenses -i ./backend -o -f table
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+
+    - name: Install license checker for Node.js
+      run: npm install -g license-checker
+
+    - name: Check Node.js licenses
+      run: license-checker --start ./frontend/AutoDocOps-Frontend --production --onlyAllow 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC'
+      continue-on-error: true
+
+  # Security Policy Compliance
+  security-policy:
+    name: Security Policy Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check for SECURITY.md
+      run: |
+        if [ ! -f SECURITY.md ]; then
+          echo "❌ SECURITY.md file not found"
+          echo "Please create a SECURITY.md file with security policy"
+          exit 1
+        else
+          echo "✅ SECURITY.md file found"
+        fi
+
+    - name: Check for security headers in Dockerfile
+      run: |
+        if grep -q "USER" ./backend/Dockerfile; then
+          echo "✅ Non-root user configured in Dockerfile"
+        else
+          echo "❌ No non-root user found in Dockerfile"
+          exit 1
+        fi
+
+    - name: Validate security configurations
+      run: |
+        # Verificar que no hay secrets hardcodeados en archivos de configuración
+        if grep -r "password\|secret\|key" --include="*.json" --include="*.yml" --include="*.yaml" . | grep -v "example\|template\|placeholder"; then
+          echo "❌ Potential hardcoded secrets found"
+          exit 1
+        else
+          echo "✅ No hardcoded secrets detected"
+        fi
+

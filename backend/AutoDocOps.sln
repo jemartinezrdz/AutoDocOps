@@ -1,0 +1,76 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E82204E-0F78-4521-8B06-67A8E9EC8D53}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AutoDocOps.Domain", "AutoDocOps.Domain", "{6BF4038C-BF38-400F-BD7B-4F5FB7B37722}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDocOps.Domain", "src\AutoDocOps.Domain\AutoDocOps.Domain\AutoDocOps.Domain.csproj", "{D45B5D8A-B41F-429B-8D2E-82856B449458}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AutoDocOps.Application", "AutoDocOps.Application", "{05FF6732-09A6-4E66-A860-467A618057C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDocOps.Application", "src\AutoDocOps.Application\AutoDocOps.Application\AutoDocOps.Application.csproj", "{3EC64012-225F-4382-B241-0A2CC285CE04}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AutoDocOps.Infrastructure", "AutoDocOps.Infrastructure", "{56C3FA18-83D0-458B-9025-2BEE79EA5AAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDocOps.Infrastructure", "src\AutoDocOps.Infrastructure\AutoDocOps.Infrastructure\AutoDocOps.Infrastructure.csproj", "{B40FC1E5-BDCE-4D38-B817-71C7E5034B1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AutoDocOps.Api", "AutoDocOps.Api", "{F2BB1513-298F-44D4-9CA6-B11B4B6C3702}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDocOps.Api", "src\AutoDocOps.Api\AutoDocOps.Api\AutoDocOps.Api.csproj", "{92557309-FB4A-4294-9363-5CD26E5161D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{50721C2F-7465-47A3-A411-6EB042CA3AFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDocOps.Tests.Unit", "tests\AutoDocOps.Tests.Unit\AutoDocOps.Tests.Unit.csproj", "{C5137C3F-DD76-44C1-A2EB-8B8BD1436803}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoDocOps.Tests.Integration", "tests\AutoDocOps.Tests.Integration\AutoDocOps.Tests.Integration.csproj", "{E499BC9C-539C-43EA-83A3-C3A09F1ED867}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D45B5D8A-B41F-429B-8D2E-82856B449458}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D45B5D8A-B41F-429B-8D2E-82856B449458}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D45B5D8A-B41F-429B-8D2E-82856B449458}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D45B5D8A-B41F-429B-8D2E-82856B449458}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EC64012-225F-4382-B241-0A2CC285CE04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EC64012-225F-4382-B241-0A2CC285CE04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EC64012-225F-4382-B241-0A2CC285CE04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EC64012-225F-4382-B241-0A2CC285CE04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B40FC1E5-BDCE-4D38-B817-71C7E5034B1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B40FC1E5-BDCE-4D38-B817-71C7E5034B1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B40FC1E5-BDCE-4D38-B817-71C7E5034B1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B40FC1E5-BDCE-4D38-B817-71C7E5034B1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92557309-FB4A-4294-9363-5CD26E5161D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92557309-FB4A-4294-9363-5CD26E5161D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92557309-FB4A-4294-9363-5CD26E5161D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92557309-FB4A-4294-9363-5CD26E5161D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5137C3F-DD76-44C1-A2EB-8B8BD1436803}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5137C3F-DD76-44C1-A2EB-8B8BD1436803}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5137C3F-DD76-44C1-A2EB-8B8BD1436803}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5137C3F-DD76-44C1-A2EB-8B8BD1436803}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E499BC9C-539C-43EA-83A3-C3A09F1ED867}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E499BC9C-539C-43EA-83A3-C3A09F1ED867}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E499BC9C-539C-43EA-83A3-C3A09F1ED867}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E499BC9C-539C-43EA-83A3-C3A09F1ED867}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6BF4038C-BF38-400F-BD7B-4F5FB7B37722} = {4E82204E-0F78-4521-8B06-67A8E9EC8D53}
+		{D45B5D8A-B41F-429B-8D2E-82856B449458} = {6BF4038C-BF38-400F-BD7B-4F5FB7B37722}
+		{05FF6732-09A6-4E66-A860-467A618057C8} = {4E82204E-0F78-4521-8B06-67A8E9EC8D53}
+		{3EC64012-225F-4382-B241-0A2CC285CE04} = {05FF6732-09A6-4E66-A860-467A618057C8}
+		{56C3FA18-83D0-458B-9025-2BEE79EA5AAE} = {4E82204E-0F78-4521-8B06-67A8E9EC8D53}
+		{B40FC1E5-BDCE-4D38-B817-71C7E5034B1D} = {56C3FA18-83D0-458B-9025-2BEE79EA5AAE}
+		{F2BB1513-298F-44D4-9CA6-B11B4B6C3702} = {4E82204E-0F78-4521-8B06-67A8E9EC8D53}
+		{92557309-FB4A-4294-9363-5CD26E5161D1} = {F2BB1513-298F-44D4-9CA6-B11B4B6C3702}
+		{C5137C3F-DD76-44C1-A2EB-8B8BD1436803} = {50721C2F-7465-47A3-A411-6EB042CA3AFC}
+		{E499BC9C-539C-43EA-83A3-C3A09F1ED867} = {50721C2F-7465-47A3-A411-6EB042CA3AFC}
+	EndGlobalSection
+EndGlobal

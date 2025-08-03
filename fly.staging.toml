@@ -1,0 +1,86 @@
+# Configuración de Fly.io para AutoDocOps API - Staging
+app = "autodocops-staging"
+primary_region = "mia"  # Miami para mejor latencia en LATAM
+
+[build]
+  dockerfile = "./backend/Dockerfile"
+
+[env]
+  ASPNETCORE_ENVIRONMENT = "Staging"
+  ASPNETCORE_URLS = "http://0.0.0.0:8080"
+  ASPNETCORE_HTTP_PORTS = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 500
+    soft_limit = 400
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/health"
+
+[machine]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+# Configuración de base de datos (Supabase Staging)
+[env]
+  DATABASE_URL = { from_secret = "STAGING_DATABASE_URL" }
+  SUPABASE_URL = { from_secret = "STAGING_SUPABASE_URL" }
+  SUPABASE_KEY = { from_secret = "STAGING_SUPABASE_KEY" }
+  OPENAI_API_KEY = { from_secret = "OPENAI_API_KEY" }
+  JWT_KEY = { from_secret = "STAGING_JWT_KEY" }
+  JWT_ISSUER = "AutoDocOps-Staging"
+  JWT_AUDIENCE = "AutoDocOps-Staging-Users"
+
+# Configuración de métricas y logging
+[metrics]
+  port = 9091
+  path = "/metrics"
+
+# Configuración de volúmenes para logs
+[[mounts]]
+  source = "autodocops_staging_logs"
+  destination = "/app/logs"
+
+# Configuración de red
+[network]
+  ipv4_dedicated = false
+  ipv6 = false
+
+# Configuración de escalado (más conservador para staging)
+[scaling]
+  min_machines_running = 1
+  max_machines_running = 3
+
+  [[scaling.regions]]
+    region = "mia"
+    min_machines_running = 1
+
+# Configuración de deploy
+[deploy]
+  release_command = "echo 'Staging deployment completed'"
+  strategy = "immediate"
+
+# Configuración de restart policy
+[restart]
+  policy = "on-failure"
+  max_retries = 2
+

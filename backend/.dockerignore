@@ -1,0 +1,107 @@
+# Archivos y directorios a ignorar en Docker build
+
+# Directorios de build y output
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# Archivos de Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Archivos de test y coverage
+**/TestResults/
+**/coverage/
+**/*.trx
+**/*.coverage
+**/*.coveragexml
+
+# Archivos de NuGet
+**/packages/
+*.nupkg
+*.snupkg
+
+# Archivos temporales
+**/tmp/
+**/temp/
+**/.tmp/
+
+# Logs
+**/logs/
+*.log
+
+# Archivos de configuración local
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/.env
+**/.env.local
+
+# Archivos de Git
+.git/
+.gitignore
+.gitattributes
+
+# Archivos de documentación
+README.md
+CHANGELOG.md
+LICENSE
+**/*.md
+
+# Archivos de CI/CD
+.github/
+azure-pipelines.yml
+Dockerfile
+.dockerignore
+
+# Archivos de Node.js (si los hay)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de IDE
+*.swp
+*.swo
+*~
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos de profiling
+*.psess
+*.vsp
+*.vspx
+
+# Archivos de database
+*.mdf
+*.ldf
+*.db
+*.sqlite
+
+# Archivos de certificados (por seguridad)
+*.pfx
+*.p12
+*.key
+*.pem
+*.crt
+
+# Archivos de Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Archivos de Kubernetes
+*.yaml
+*.yml
+!docker-compose.yml
+
