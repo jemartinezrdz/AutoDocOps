@@ -1,7 +1,7 @@
-# Dockerfile simplificado para Render
+# Dockerfile optimizado para Fly.io
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 10000
+EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
@@ -22,7 +22,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-ENV ASPNETCORE_URLS=http://0.0.0.0:10000
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 ENTRYPOINT ["dotnet", "AutoDocOps.Api.dll"]
