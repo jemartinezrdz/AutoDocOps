@@ -193,7 +193,10 @@ export interface SemanticSearchResult {
 // Navigation types
 export type RootStackParamList = {
   Auth: undefined;
+  Login: undefined;
+  Register: undefined;
   Main: undefined;
+  CreateProject: undefined;
   ProjectDetail: { projectId: string };
   DocumentationViewer: { projectId: string; type: 'api' | 'database' };
   Settings: undefined;
