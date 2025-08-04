@@ -74,3 +74,6 @@ app.Run();
 
 public record DocumentationRequest(string ProjectName, string? Description = null);
 
+// Make Program class accessible for integration tests
+public partial class Program { }
+
