@@ -97,8 +97,18 @@ public class Project : BaseEntity
         DocumentationConfig documentationConfig,
         Guid createdBy)
     {
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-        Description = description ?? throw new ArgumentNullException(nameof(description));
+        if (name is null)
+            throw new ArgumentNullException(nameof(name), "El nombre del proyecto no puede ser nulo");
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("El nombre del proyecto no puede estar vacío", nameof(name));
+
+        if (description is null)
+            throw new ArgumentNullException(nameof(description), "La descripción del proyecto no puede ser nula");
+        if (string.IsNullOrWhiteSpace(description))
+            throw new ArgumentException("La descripción del proyecto no puede estar vacía", nameof(description));
+
+        Name = name;
+        Description = description;
         Type = type;
         ConnectionConfig = connectionConfig ?? throw new ArgumentNullException(nameof(connectionConfig));
         PreferredLanguage = preferredLanguage;
@@ -116,8 +126,18 @@ public class Project : BaseEntity
     /// <param name="updatedBy">Usuario que realiza la actualización</param>
     public void UpdateBasicInfo(string name, string description, Guid updatedBy)
     {
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-        Description = description ?? throw new ArgumentNullException(nameof(description));
+        if (name is null)
+            throw new ArgumentNullException(nameof(name), "El nombre del proyecto no puede ser nulo");
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("El nombre del proyecto no puede estar vacío", nameof(name));
+
+        if (description is null)
+            throw new ArgumentNullException(nameof(description), "La descripción del proyecto no puede ser nula");
+        if (string.IsNullOrWhiteSpace(description))
+            throw new ArgumentException("La descripción del proyecto no puede estar vacía", nameof(description));
+
+        Name = name;
+        Description = description;
         UpdateTimestamp(updatedBy);
     }
 
@@ -174,7 +194,16 @@ public class Project : BaseEntity
     /// <param name="updatedBy">Usuario que actualiza la versión</param>
     public void UpdateVersion(string version, Guid updatedBy)
     {
-        Version = version ?? throw new ArgumentNullException(nameof(version));
+        if (version is null)
+            throw new ArgumentNullException(nameof(version), "La versión no puede ser nula");
+        if (string.IsNullOrWhiteSpace(version))
+            throw new ArgumentException("La versión no puede estar vacía", nameof(version));
+        // Validar formato semántico x.y.z
+        var semverRegex = "^\\d+\\.\\d+\\.\\d+$";
+        if (!System.Text.RegularExpressions.Regex.IsMatch(version, semverRegex))
+            throw new ArgumentException("La versión debe tener formato x.y.z", nameof(version));
+
+        Version = version;
         UpdateTimestamp(updatedBy);
     }
 }

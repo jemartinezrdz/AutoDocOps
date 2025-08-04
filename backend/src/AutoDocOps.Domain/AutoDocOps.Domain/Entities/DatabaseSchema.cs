@@ -142,13 +142,34 @@ public class DatabaseSchema : BaseEntity
         Guid createdBy)
     {
         ProjectId = projectId;
-        DatabaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName));
-        SchemaName = schemaName ?? throw new ArgumentNullException(nameof(schemaName));
-        Version = version ?? throw new ArgumentNullException(nameof(version));
-        Description = description ?? throw new ArgumentNullException(nameof(description));
+        DatabaseName = ValidateRequiredString(databaseName, nameof(databaseName));
+        SchemaName = ValidateRequiredString(schemaName, nameof(schemaName));
+        Version = ValidateSemanticVersion(version, nameof(version));
+        Description = ValidateRequiredString(description, nameof(description));
         Language = language;
         CreatedBy = createdBy;
         UpdatedBy = createdBy;
+    }
+
+    private static string ValidateRequiredString(string value, string paramName)
+    {
+        if (value == null)
+            throw new ArgumentNullException(paramName);
+        if (string.IsNullOrWhiteSpace(value))
+            throw new ArgumentException($"'{paramName}' cannot be empty or whitespace.", paramName);
+        return value;
+    }
+
+    private static string ValidateSemanticVersion(string version, string paramName)
+    {
+        if (version == null)
+            throw new ArgumentNullException(paramName);
+        if (string.IsNullOrWhiteSpace(version))
+            throw new ArgumentException($"'{paramName}' cannot be empty or whitespace.", paramName);
+        var regex = new System.Text.RegularExpressions.Regex(@"^\d+\.\d+\.\d+(-[\w\d]+)?$");
+        if (!regex.IsMatch(version))
+            throw new ArgumentException($"'{paramName}' must be a valid semantic version (e.g., 1.0.0, 2.1.3-beta).", paramName);
+        return version;
     }
 
     /// <summary>
@@ -286,10 +307,10 @@ public class DatabaseSchema : BaseEntity
     /// <param name="updatedBy">Usuario que realiza la actualización</param>
     public void UpdateBasicInfo(string databaseName, string schemaName, string version, string description, Guid updatedBy)
     {
-        DatabaseName = databaseName ?? throw new ArgumentNullException(nameof(databaseName));
-        SchemaName = schemaName ?? throw new ArgumentNullException(nameof(schemaName));
-        Version = version ?? throw new ArgumentNullException(nameof(version));
-        Description = description ?? throw new ArgumentNullException(nameof(description));
+        DatabaseName = ValidateRequiredString(databaseName, nameof(databaseName));
+        SchemaName = ValidateRequiredString(schemaName, nameof(schemaName));
+        Version = ValidateSemanticVersion(version, nameof(version));
+        Description = ValidateRequiredString(description, nameof(description));
         UpdateTimestamp(updatedBy);
     }
 }

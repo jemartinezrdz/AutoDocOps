@@ -107,13 +107,34 @@ public class ApiDocumentation : BaseEntity
         Guid createdBy)
     {
         ProjectId = projectId;
-        ApiName = apiName ?? throw new ArgumentNullException(nameof(apiName));
-        Version = version ?? throw new ArgumentNullException(nameof(version));
-        BaseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
-        Description = description ?? throw new ArgumentNullException(nameof(description));
+        ApiName = ValidateRequiredString(apiName, nameof(apiName));
+        Version = ValidateSemanticVersion(version, nameof(version));
+        BaseUrl = ValidateRequiredString(baseUrl, nameof(baseUrl));
+        Description = ValidateRequiredString(description, nameof(description));
         Language = language;
         CreatedBy = createdBy;
         UpdatedBy = createdBy;
+    }
+
+    private static string ValidateRequiredString(string value, string paramName)
+    {
+        if (value == null)
+            throw new ArgumentNullException(paramName);
+        if (string.IsNullOrWhiteSpace(value))
+            throw new ArgumentException($"'{paramName}' cannot be empty or whitespace.", paramName);
+        return value;
+    }
+
+    private static string ValidateSemanticVersion(string version, string paramName)
+    {
+        if (version == null)
+            throw new ArgumentNullException(paramName);
+        if (string.IsNullOrWhiteSpace(version))
+            throw new ArgumentException($"'{paramName}' cannot be empty or whitespace.", paramName);
+        var regex = new System.Text.RegularExpressions.Regex(@"^\d+\.\d+\.\d+(-[\w\d]+)?$");
+        if (!regex.IsMatch(version))
+            throw new ArgumentException($"'{paramName}' must be a valid semantic version (e.g., 1.0.0, 2.1.3-beta).", paramName);
+        return version;
     }
 
     /// <summary>
@@ -204,10 +225,10 @@ public class ApiDocumentation : BaseEntity
     /// <param name="updatedBy">Usuario que realiza la actualización</param>
     public void UpdateBasicInfo(string apiName, string version, string baseUrl, string description, Guid updatedBy)
     {
-        ApiName = apiName ?? throw new ArgumentNullException(nameof(apiName));
-        Version = version ?? throw new ArgumentNullException(nameof(version));
-        BaseUrl = baseUrl ?? throw new ArgumentNullException(nameof(baseUrl));
-        Description = description ?? throw new ArgumentNullException(nameof(description));
+        ApiName = ValidateRequiredString(apiName, nameof(apiName));
+        Version = ValidateSemanticVersion(version, nameof(version));
+        BaseUrl = ValidateRequiredString(baseUrl, nameof(baseUrl));
+        Description = ValidateRequiredString(description, nameof(description));
         UpdateTimestamp(updatedBy);
     }
 }

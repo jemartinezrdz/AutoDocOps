@@ -11,5 +11,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
-</Project>
+  <ItemGroup>
+    <ProjectReference Include="..\..\AutoDocOps.Infrastructure\AutoDocOps.Infrastructure\AutoDocOps.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\AutoDocOps.Application\AutoDocOps.Application\AutoDocOps.Application.csproj" />
+    <ProjectReference Include="..\..\AutoDocOps.Domain\AutoDocOps.Domain\AutoDocOps.Domain.csproj" />
+  </ItemGroup>
 
+</Project>

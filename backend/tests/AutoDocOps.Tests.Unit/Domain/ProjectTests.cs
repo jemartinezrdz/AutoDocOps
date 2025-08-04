@@ -1,6 +1,10 @@
 using AutoDocOps.Domain.Entities;
 using AutoDocOps.Domain.Enums;
 using AutoDocOps.Domain.ValueObjects;
+using FluentAssertions;
+using System;
+using System.Threading;
+using Xunit;
 
 namespace AutoDocOps.Tests.Unit.Domain;
 
@@ -55,32 +59,38 @@ public class ProjectTests
         project.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public void Project_ShouldThrowException_WhenNameIsInvalid(string invalidName)
+    [Fact]
+    public void Project_ShouldThrowArgumentNullException_WhenNameIsNull()
     {
         // Arrange
         var description = "Valid Description";
         var createdBy = Guid.NewGuid();
-        var connectionConfig = new ConnectionConfig
-        {
-            ConnectionString = "test connection"
-        };
+        var connectionConfig = new ConnectionConfig { ConnectionString = "test connection" };
         var docConfig = new DocumentationConfig();
 
-        // Act & Assert
-        var act = () => new Project(
-            invalidName,
-            description,
-            ProjectType.DotNetApi,
-            connectionConfig,
-            Language.Spanish,
-            docConfig,
-            createdBy);
+        // Act
+        Action act = () => new Project(null, description, ProjectType.DotNetApi, connectionConfig, Language.Spanish, docConfig, createdBy);
 
+        // Assert
         act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Project_ShouldThrowArgumentException_WhenNameIsEmptyOrWhitespace(string invalidName)
+    {
+        // Arrange
+        var description = "Valid Description";
+        var createdBy = Guid.NewGuid();
+        var connectionConfig = new ConnectionConfig { ConnectionString = "test connection" };
+        var docConfig = new DocumentationConfig();
+
+        // Act
+        Action act = () => new Project(invalidName, description, ProjectType.DotNetApi, connectionConfig, Language.Spanish, docConfig, createdBy);
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
     }
 
     [Fact]
@@ -284,4 +294,3 @@ public class ProjectTests
             Guid.NewGuid());
     }
 }
-

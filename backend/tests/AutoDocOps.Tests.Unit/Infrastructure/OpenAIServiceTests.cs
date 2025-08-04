@@ -69,8 +69,8 @@ public class TestController : ControllerBase
         // Arrange & Act & Assert
         var act = async () => await _openAIService.AnalyzeDotNetApiAsync(invalidSourceCode, "es");
         
-        // En un test real, esto debería lanzar una excepción o manejar el caso gracefully
-        act.Should().NotBeNull();
+        act.Should().ThrowAsync<ArgumentException>()
+           .WithMessage("*código fuente no puede estar vacío*");
     }
 
     [Theory]
@@ -233,8 +233,8 @@ CREATE TABLE Users (
         // Act & Assert
         var act = async () => await _openAIService.AnswerQuestionAsync(invalidQuestion, context, language);
         
-        // En un test real, esto debería manejar el caso gracefully
-        act.Should().NotBeNull();
+        act.Should().ThrowAsync<ArgumentException>()
+           .WithMessage("*pregunta no puede estar vacía*");
     }
 
     [Theory]
@@ -249,8 +249,8 @@ CREATE TABLE Users (
         // Act & Assert
         var act = async () => await _openAIService.AnalyzeDotNetApiAsync(sourceCode, unsupportedLanguage);
         
-        // En un test real, esto debería usar un idioma por defecto o lanzar excepción
-        act.Should().NotBeNull();
+        act.Should().ThrowAsync<ArgumentException>()
+           .WithMessage($"*Idioma '{unsupportedLanguage}' no soportado*");
     }
 }
 

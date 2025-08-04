@@ -124,6 +124,13 @@ public class OpenAIService : IOpenAIService
     /// <inheritdoc />
     public async Task<string> AnalyzeDotNetApiAsync(string sourceCode, string language = "es")
     {
+        // Validaciones de entrada
+        if (string.IsNullOrWhiteSpace(sourceCode))
+            throw new ArgumentException("El código fuente no puede estar vacío", nameof(sourceCode));
+        
+        if (!IsValidLanguage(language))
+            throw new ArgumentException($"Idioma '{language}' no soportado. Use 'es' o 'en'", nameof(language));
+
         try
         {
             _logger.LogInformation("Analizando código .NET para generar OpenAPI");
@@ -149,6 +156,13 @@ public class OpenAIService : IOpenAIService
     /// <inheritdoc />
     public async Task<string> AnalyzeSqlServerSchemaAsync(string schemaDefinition, string language = "es")
     {
+        // Validaciones de entrada
+        if (string.IsNullOrWhiteSpace(schemaDefinition))
+            throw new ArgumentException("La definición del esquema no puede estar vacía", nameof(schemaDefinition));
+        
+        if (!IsValidLanguage(language))
+            throw new ArgumentException($"Idioma '{language}' no soportado. Use 'es' o 'en'", nameof(language));
+
         try
         {
             _logger.LogInformation("Analizando esquema SQL Server");
@@ -174,6 +188,13 @@ public class OpenAIService : IOpenAIService
     /// <inheritdoc />
     public async Task<string> GenerateUsageGuidesAsync(string openApiSpec, string language = "es")
     {
+        // Validaciones de entrada
+        if (string.IsNullOrWhiteSpace(openApiSpec))
+            throw new ArgumentException("La especificación OpenAPI no puede estar vacía", nameof(openApiSpec));
+        
+        if (!IsValidLanguage(language))
+            throw new ArgumentException($"Idioma '{language}' no soportado. Use 'es' o 'en'", nameof(language));
+
         try
         {
             _logger.LogInformation("Generando guías de uso");
@@ -199,6 +220,13 @@ public class OpenAIService : IOpenAIService
     /// <inheritdoc />
     public async Task<string> GeneratePostmanCollectionAsync(string openApiSpec, string baseUrl)
     {
+        // Validaciones de entrada
+        if (string.IsNullOrWhiteSpace(openApiSpec))
+            throw new ArgumentException("La especificación OpenAPI no puede estar vacía", nameof(openApiSpec));
+        
+        if (string.IsNullOrWhiteSpace(baseUrl))
+            throw new ArgumentException("La URL base no puede estar vacía", nameof(baseUrl));
+
         try
         {
             _logger.LogInformation("Generando colección de Postman");
@@ -221,6 +249,13 @@ public class OpenAIService : IOpenAIService
     /// <inheritdoc />
     public async Task<string> GenerateTypeScriptSDKAsync(string openApiSpec, string packageName)
     {
+        // Validaciones de entrada
+        if (string.IsNullOrWhiteSpace(openApiSpec))
+            throw new ArgumentException("La especificación OpenAPI no puede estar vacía", nameof(openApiSpec));
+        
+        if (string.IsNullOrWhiteSpace(packageName))
+            throw new ArgumentException("El nombre del paquete no puede estar vacío", nameof(packageName));
+
         try
         {
             _logger.LogInformation("Generando SDK de TypeScript");
@@ -243,6 +278,13 @@ public class OpenAIService : IOpenAIService
     /// <inheritdoc />
     public async Task<string> GenerateCSharpSDKAsync(string openApiSpec, string @namespace)
     {
+        // Validaciones de entrada
+        if (string.IsNullOrWhiteSpace(openApiSpec))
+            throw new ArgumentException("La especificación OpenAPI no puede estar vacía", nameof(openApiSpec));
+        
+        if (string.IsNullOrWhiteSpace(@namespace))
+            throw new ArgumentException("El namespace no puede estar vacío", nameof(@namespace));
+
         try
         {
             _logger.LogInformation("Generando SDK de C#");
@@ -265,6 +307,16 @@ public class OpenAIService : IOpenAIService
     /// <inheritdoc />
     public async Task<string> AnswerQuestionAsync(string question, string context, string language = "es")
     {
+        // Validaciones de entrada
+        if (string.IsNullOrWhiteSpace(question))
+            throw new ArgumentException("La pregunta no puede estar vacía", nameof(question));
+        
+        if (string.IsNullOrWhiteSpace(context))
+            throw new ArgumentException("El contexto no puede estar vacío", nameof(context));
+        
+        if (!IsValidLanguage(language))
+            throw new ArgumentException($"Idioma '{language}' no soportado. Use 'es' o 'en'", nameof(language));
+
         try
         {
             _logger.LogInformation("Respondiendo pregunta con chat semántico");
@@ -290,6 +342,13 @@ public class OpenAIService : IOpenAIService
     /// <inheritdoc />
     public async Task<string> GenerateERDiagramAsync(string schemaDefinition, string language = "es")
     {
+        // Validaciones de entrada
+        if (string.IsNullOrWhiteSpace(schemaDefinition))
+            throw new ArgumentException("La definición del esquema no puede estar vacía", nameof(schemaDefinition));
+        
+        if (!IsValidLanguage(language))
+            throw new ArgumentException($"Idioma '{language}' no soportado. Use 'es' o 'en'", nameof(language));
+
         try
         {
             _logger.LogInformation("Generando diagrama ER");
@@ -315,6 +374,13 @@ public class OpenAIService : IOpenAIService
     /// <inheritdoc />
     public async Task<string> GenerateDataDictionaryAsync(string schemaDefinition, string language = "es")
     {
+        // Validaciones de entrada
+        if (string.IsNullOrWhiteSpace(schemaDefinition))
+            throw new ArgumentException("La definición del esquema no puede estar vacía", nameof(schemaDefinition));
+        
+        if (!IsValidLanguage(language))
+            throw new ArgumentException($"Idioma '{language}' no soportado. Use 'es' o 'en'", nameof(language));
+
         try
         {
             _logger.LogInformation("Generando diccionario de datos");
@@ -649,6 +715,20 @@ Instructions:
 7. Generate proper project structure
 
 Output format: Complete C# SDK code with proper structure and documentation";
+    }
+
+    #endregion
+
+    #region Private Helper Methods
+
+    /// <summary>
+    /// Valida si el idioma es soportado
+    /// </summary>
+    /// <param name="language">Idioma a validar</param>
+    /// <returns>True si es válido, false en caso contrario</returns>
+    private static bool IsValidLanguage(string language)
+    {
+        return language is "es" or "en";
     }
 
     #endregion
