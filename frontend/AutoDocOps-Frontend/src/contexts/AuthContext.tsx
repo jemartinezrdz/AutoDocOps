@@ -117,7 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     } catch (error) {
-      console.error('Error restoring session:', error);
+      // Error restoring session - user will need to login again
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
@@ -179,7 +179,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Call logout endpoint
       await apiService.post('/auth/logout');
     } catch (error) {
-      console.error('Error calling logout endpoint:', error);
+      // Error calling logout endpoint - will clear session anyway
     } finally {
       await clearStoredSession();
       dispatch({ type: 'LOGOUT' });
@@ -202,7 +202,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await SecureStore.setItemAsync(STORAGE_KEYS.AUTH_TOKEN, token);
       }
     } catch (error) {
-      console.error('Error refreshing token:', error);
+      // Error refreshing token - logout user
       await logout();
     }
   };
@@ -213,7 +213,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await SecureStore.deleteItemAsync(STORAGE_KEYS.USER_DATA);
       await apiService.clearAuthToken();
     } catch (error) {
-      console.error('Error clearing stored session:', error);
+      // Error clearing stored session - operation failed silently
     }
   };
 
