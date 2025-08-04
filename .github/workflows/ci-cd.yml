@@ -51,7 +51,7 @@ jobs:
         path: backend/TestResults/
         
     - name: Generate code coverage report
-      uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.4.11
       with:
         reports: 'backend/TestResults/**/coverage.cobertura.xml'
         targetdir: 'backend/CoverageReports'
