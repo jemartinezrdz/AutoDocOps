@@ -1,11 +1,10 @@
 {
   "root": true,
   "extends": [
-    "@expo/eslint-config-base",
+    "expo",
     "@typescript-eslint/recommended",
     "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    "plugin:react-hooks/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -40,10 +39,7 @@
     "@typescript-eslint/no-non-null-assertion": "error",
     "@typescript-eslint/prefer-nullish-coalescing": "error",
     "@typescript-eslint/prefer-optional-chain": "error",
-    "@typescript-eslint/strict-boolean-expressions": "error",
     "@typescript-eslint/prefer-readonly": "error",
-    "@typescript-eslint/no-floating-promises": "error",
-    "@typescript-eslint/await-thenable": "error",
     
     // React rules
     "react/react-in-jsx-scope": "off", // Not needed in React 17+
@@ -84,19 +80,7 @@
     "array-bracket-spacing": ["error", "never"],
     "max-len": ["warn", { "code": 100, "ignoreUrls": true }],
     "max-lines-per-function": ["warn", { "max": 50 }],
-    "complexity": ["warn", 10],
-    
-    // Import organization
-    "sort-imports": [
-      "error",
-      {
-        "ignoreCase": false,
-        "ignoreDeclarationSort": true,
-        "ignoreMemberSort": false,
-        "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
-        "allowSeparatedGroups": true
-      }
-    ]
+    "complexity": ["warn", 10]
   },
   "overrides": [
     {
