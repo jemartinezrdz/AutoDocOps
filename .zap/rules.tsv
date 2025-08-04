@@ -1,0 +1,64 @@
+# ZAP Rules Configuration for AutoDocOps
+# Format: RULE_ID	THRESHOLD	ACTION
+# THRESHOLD: FAIL, WARN, IGNORE
+# ACTION: For active scan only
+
+# High Priority Security Rules
+10021	FAIL	# X-Content-Type-Options Header Missing
+10020	FAIL	# X-Frame-Options Header Missing  
+10016	FAIL	# Web Browser XSS Protection Not Enabled
+10035	FAIL	# Strict-Transport-Security Header Missing
+10038	FAIL	# Content Security Policy (CSP) Header Missing
+
+# Medium Priority Rules
+10015	WARN	# Incomplete or No Cache-control and Pragma HTTP Header Set
+10017	WARN	# Cross-Domain JavaScript Source File Inclusion
+10019	WARN	# Content-Type Header Missing
+10036	WARN	# Server Leaks Version Information via "Server" HTTP Response Header Field
+10037	WARN	# Server Leaks Information via "X-Powered-By" HTTP Response Header Field
+
+# Authentication and Session Management
+10040	FAIL	# Secure Cookie Attribute Missing
+10041	FAIL	# HTTP to HTTPS Insecure Transition in Form Post
+10042	FAIL	# HTTPS to HTTP Insecure Transition in Form Post
+10043	FAIL	# User Controllable JavaScript Event (XSS)
+
+# Input Validation
+40012	FAIL	# Cross Site Scripting (Reflected)
+40013	FAIL	# Session Fixation
+40014	FAIL	# Cross Site Scripting (Persistent)
+40016	FAIL	# Cross Site Scripting (Persistent) - Prime
+40017	FAIL	# Cross Site Scripting (Persistent) - Spider
+40018	FAIL	# SQL Injection
+40019	FAIL	# SQL Injection - MySQL
+40020	FAIL	# SQL Injection - Hypersonic SQL
+40021	FAIL	# SQL Injection - Oracle
+40022	FAIL	# SQL Injection - PostgreSQL
+
+# Information Disclosure
+10054	WARN	# Cookie Without SameSite Attribute
+10055	WARN	# CSP Scanner Rule
+10056	WARN	# X-Debug-Token Information Leak
+10057	WARN	# Username Hash Found
+10061	WARN	# X-AspNet-Version Response Header
+
+# API Specific Rules
+10095	WARN	# Backup File Disclosure
+10096	WARN	# Timestamp Disclosure - Unix
+10097	WARN	# Hash Disclosure - MD5
+10098	WARN	# Cross-Domain Misconfiguration
+
+# Rate Limiting and DoS Protection
+10108	WARN	# Reverse Tabnabbing
+10109	WARN	# Modern Web Application
+10110	WARN	# Dangerous JS Functions
+
+# Ignore rules that are not applicable to APIs
+10028	IGNORE	# Open Redirect (not applicable for API endpoints)
+10029	IGNORE	# Cookie Poisoning (not applicable for stateless API)
+10030	IGNORE	# User Controllable Charset (not applicable for JSON API)
+
+# Low priority or false positive prone rules
+2	IGNORE	# Private IP Disclosure
+3	IGNORE	# Session ID in URL Rewrite
+90001	IGNORE	# Insecure JSF ViewState

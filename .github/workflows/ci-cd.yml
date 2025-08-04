@@ -8,6 +8,7 @@ on:
 
 env:
   DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '20.x'
 
 jobs:
   # Job 1: Build y Test Backend
@@ -26,21 +27,204 @@ jobs:
         
     - name: Restore dependencias
       run: |
-        cd backend/src/AutoDocOps.Api/AutoDocOps.Api
+        cd backend
         dotnet restore
       
     - name: Build backend
       run: |
-        cd backend/src/AutoDocOps.Api/AutoDocOps.Api
+        cd backend
         dotnet build --no-restore --configuration Release
       
-    - name: Test compilation
+    - name: Run unit tests
+      run: |
+        cd backend
+        dotnet test --no-build --configuration Release --verbosity normal \
+          --collect:"XPlat Code Coverage" \
+          --results-directory TestResults/ \
+          --logger "trx;LogFileName=test-results.trx"
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: backend-test-results
+        path: backend/TestResults/
+        
+    - name: Generate code coverage report
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
+      with:
+        reports: 'backend/TestResults/**/coverage.cobertura.xml'
+        targetdir: 'backend/CoverageReports'
+        reporttypes: 'Html;Cobertura;JsonSummary'
+        
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-coverage-report
+        path: backend/CoverageReports/
+        
+    - name: Check coverage threshold
+      run: |
+        cd backend/CoverageReports
+        COVERAGE=$(jq -r '.summary.linecoverage' Summary.json)
+        echo "Line coverage: $COVERAGE%"
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "❌ Coverage $COVERAGE% is below 80% threshold"
+          exit 1
+        else
+          echo "✅ Coverage $COVERAGE% meets 80% threshold"
+        fi
+
+  # Job 2: Frontend Build & Test
+  frontend-build-test:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/AutoDocOps-Frontend/package-lock.json
+        
+    - name: Install dependencies
+      run: |
+        cd frontend/AutoDocOps-Frontend
+        npm ci
+        
+    - name: Lint frontend code
+      run: |
+        cd frontend/AutoDocOps-Frontend
+        npm run lint:check
+        
+    - name: Type check
+      run: |
+        cd frontend/AutoDocOps-Frontend
+        npm run type-check
+        
+    - name: Format check
+      run: |
+        cd frontend/AutoDocOps-Frontend
+        npm run format:check
+        
+    - name: Run unit tests
+      run: |
+        cd frontend/AutoDocOps-Frontend
+        npm run test:coverage
+        
+    - name: Upload frontend test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: frontend-test-results
+        path: frontend/AutoDocOps-Frontend/coverage/
+
+  # Job 3: Contract Tests
+  contract-tests:
+    name: Contract Tests
+    runs-on: ubuntu-latest
+    needs: [backend-build-test]
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Start API for contract testing
       run: |
         cd backend/src/AutoDocOps.Api/AutoDocOps.Api
-        dotnet publish --no-build --configuration Release --output ./publish
-        echo "✅ Backend compiled and published successfully"
+        dotnet run --urls=http://localhost:5000 &
+        sleep 30 # Wait for API to start
+        
+    - name: Run contract tests
+      run: |
+        # Test all documented endpoints
+        curl -f http://localhost:5000/health || exit 1
+        curl -f http://localhost:5000/api/info || exit 1
+        curl -f http://localhost:5000/api/v1/documentation || exit 1
+        
+        # Test POST endpoint
+        curl -f -X POST http://localhost:5000/api/v1/documentation/generate \
+          -H "Content-Type: application/json" \
+          -d '{"projectName":"test","description":"test"}' || exit 1
+        
+        echo "✅ All contract tests passed"
 
-  # Job 2: Security Scanning (Básico)
+  # Job 4: E2E Tests
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: [backend-build-test, frontend-build-test]
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: Install Playwright
+      run: |
+        npm install -g @playwright/test
+        playwright install --with-deps
+        
+    - name: Run E2E tests
+      run: |
+        npx playwright test
+      env:
+        BASE_URL: https://autodocops-staging.fly.dev
+        
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: e2e-test-results
+        path: test-results/
+
+  # Job 5: Load Tests
+  load-tests:
+    name: Load Tests (k6)
+    runs-on: ubuntu-latest
+    needs: [contract-tests]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Setup k6
+      run: |
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+        
+    - name: Run load tests
+      run: |
+        mkdir -p test-results
+        k6 run tests/load/api-load-test.js
+      env:
+        BASE_URL: https://autodocops-staging.fly.dev
+        
+    - name: Upload load test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: load-test-results
+        path: test-results/
+
+  # Job 6: Security Scanning (Enhanced)
   security-scan:
     name: Security Scanning
     runs-on: ubuntu-latest
@@ -50,22 +234,37 @@ jobs:
     - name: Checkout código
       uses: actions/checkout@v4
       
+    - name: Run OWASP ZAP Baseline Scan
+      uses: zaproxy/action-baseline@v0.10.0
+      with:
+        target: 'https://autodocops-staging.fly.dev'
+        rules_file_name: '.zap/rules.tsv'
+        cmd_options: '-a'
+        
+    - name: Upload ZAP scan results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: zap-security-results
+        path: report_html.html
+        
     - name: Run basic security check
       run: |
         echo "🔒 Running basic security checks..."
         # Verificar que no hay secretos hardcodeados
-        if grep -r "sk-" . --exclude-dir=.git --exclude="*.yml" --exclude="*.yaml" | grep -v "example\|template"; then
-          echo "❌ Potential API keys found in code"
+        if grep -r "sk-\|pk_\|password\s*=" . --exclude-dir=.git --exclude="*.yml" --exclude="*.yaml" --exclude-dir=node_modules | grep -v "example\|template\|test"; then
+          echo "❌ Potential secrets found in code"
           exit 1
         fi
         echo "✅ Basic security checks passed"
 
-  # Job 3: Deploy to Production (Solo si es main)
+  # Job 7: Deploy to Production (Solo si es main)
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [backend-build-test, security-scan]
+    needs: [backend-build-test, frontend-build-test, contract-tests, e2e-tests, security-scan]
     if: github.ref == 'refs/heads/main'
+    environment: production
     
     steps:
     - name: Checkout código
@@ -79,11 +278,69 @@ jobs:
       env:
         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         
-    - name: Health check
+    - name: Health check post-deployment
       run: |
         echo "⏳ Waiting for deployment..."
         sleep 30
         echo "🏥 Running health check..."
-        curl -f https://autodocops-api.fly.dev/health || echo "⚠️ Health check failed, but deployment completed"
-        echo "✅ Deployment process completed"
+        
+        # Wait up to 5 minutes for health check to pass
+        for i in {1..30}; do
+          if curl -f https://autodocops-api.fly.dev/health; then
+            echo "✅ Health check passed"
+            break
+          else
+            echo "⏳ Health check attempt $i/30 failed, retrying..."
+            sleep 10
+          fi
+          
+          if [ $i -eq 30 ]; then
+            echo "❌ Health check failed after 5 minutes"
+            exit 1
+          fi
+        done
+        
+    - name: Run smoke tests post-deployment
+      run: |
+        echo "🧪 Running smoke tests..."
+        
+        # Test API endpoints
+        curl -f https://autodocops-api.fly.dev/api/info || exit 1
+        curl -f https://autodocops-api.fly.dev/api/v1/documentation || exit 1
+        
+        # Test documentation generation
+        curl -f -X POST https://autodocops-api.fly.dev/api/v1/documentation/generate \
+          -H "Content-Type: application/json" \
+          -d '{"projectName":"smoke-test","description":"Post-deployment smoke test"}' || exit 1
+          
+        echo "✅ Smoke tests passed"
+
+  # Job 8: Performance Monitoring
+  performance-monitoring:
+    name: Performance Monitoring
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+      
+    - name: Run performance monitoring
+      run: |
+        echo "📊 Running performance monitoring..."
+        
+        # Measure response times
+        for endpoint in "/health" "/api/info" "/api/v1/documentation"; do
+          echo "Testing $endpoint..."
+          time=$(curl -w "%{time_total}" -s -o /dev/null https://autodocops-api.fly.dev$endpoint)
+          echo "Response time for $endpoint: ${time}s"
+          
+          # Check if response time is under 300ms (0.3s)
+          if (( $(echo "$time > 0.3" | bc -l) )); then
+            echo "⚠️ Warning: $endpoint response time ${time}s exceeds 300ms"
+          else
+            echo "✅ $endpoint response time within limits"
+          fi
+        done
 

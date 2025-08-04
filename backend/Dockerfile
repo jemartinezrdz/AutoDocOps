@@ -17,8 +17,18 @@ RUN dotnet publish -c Release -o /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+
+# Create a non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Change ownership of the app directory to the non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
 
 # Expose port
 EXPOSE 8080
