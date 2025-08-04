@@ -61,7 +61,7 @@ class ApiService {
         this.authToken = token;
       }
     } catch (error) {
-      console.error('Error loading auth token:', error);
+      // Error loading auth token - token will remain null
     }
   }
 
@@ -70,7 +70,7 @@ class ApiService {
       this.authToken = token;
       await SecureStore.setItemAsync(STORAGE_KEYS.AUTH_TOKEN, token);
     } catch (error) {
-      console.error('Error saving auth token:', error);
+      // Error saving auth token - operation failed silently
     }
   }
 
@@ -79,7 +79,7 @@ class ApiService {
       this.authToken = null;
       await SecureStore.deleteItemAsync(STORAGE_KEYS.AUTH_TOKEN);
     } catch (error) {
-      console.error('Error clearing auth token:', error);
+      // Error clearing auth token - operation failed silently
     }
   }
 
